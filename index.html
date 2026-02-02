@@ -103,53 +103,6 @@
         }
         .feature h3 { color: var(--tg-theme-button-color, #3390ec); margin-bottom: 8px; }
         .feature p { color: var(--tg-theme-hint-color, #ccc); font-size: 14px; }
-        
-        /* Стили для авторизации */
-        .auth-step { padding: 20px 0; }
-        .country-selector {
-            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
-            border: 1px solid var(--tg-theme-hint-color, #333);
-            border-radius: 12px;
-            padding: 16px;
-            cursor: pointer;
-            color: var(--tg-theme-text-color, #ffffff);
-        }
-        .phone-code {
-            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
-            border: 1px solid var(--tg-theme-button-color, #3390ec);
-            border-radius: 12px;
-            padding: 16px;
-            width: 80px;
-            text-align: center;
-            color: var(--tg-theme-text-color, #ffffff);
-            font-size: 16px;
-        }
-        .phone-input {
-            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
-            border: 1px solid var(--tg-theme-hint-color, #333);
-            border-radius: 12px;
-            padding: 16px;
-            flex: 1;
-            color: var(--tg-theme-text-color, #ffffff);
-            font-size: 16px;
-        }
-        .code-input {
-            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
-            border: 1px solid var(--tg-theme-hint-color, #333);
-            border-radius: 12px;
-            padding: 16px;
-            width: 100%;
-            text-align: center;
-            font-size: 24px;
-            letter-spacing: 8px;
-            color: var(--tg-theme-text-color, #ffffff);
-            margin-bottom: 12px;
-        }
-        .action-btn.secondary {
-            background: transparent;
-            color: var(--tg-theme-button-color, #3390ec);
-            border: 1px solid var(--tg-theme-button-color, #3390ec);
-        }
     </style>
 </head>
 <body>
@@ -286,11 +239,6 @@
         }
         
         function showAuthSection() {
-            // Показываем форму ввода номера телефона
-            if (tg) {
-                tg.showAlert('Откроется форма авторизации с выбором страны');
-            }
-            
             // Создаем модальное окно авторизации
             const authModal = document.createElement('div');
             authModal.id = 'auth-modal';
@@ -379,6 +327,33 @@
             `;
             
             document.body.appendChild(authModal);
+            
+            // Добавляем обработчик для форматирования номера
+            setTimeout(() => {
+                const phoneInput = document.getElementById('phone-number');
+                if (phoneInput) {
+                    phoneInput.addEventListener('input', function(e) {
+                        let value = e.target.value.replace(/\\D/g, '');
+                        let formattedValue = '';
+                        
+                        if (value.length > 0) {
+                            if (value.length <= 3) {
+                                formattedValue = value;
+                            } else if (value.length <= 6) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
+                            } else if (value.length <= 8) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+                            } else if (value.length <= 10) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8);
+                            } else {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8, 10);
+                            }
+                        }
+                        
+                        e.target.value = formattedValue;
+                    });
+                }
+            }, 100);
         }
         
         function closeAuthModal() {
@@ -459,9 +434,7 @@
                                      color: var(--tg-theme-text-color, #fff);
                                      border: 1px solid var(--tg-theme-hint-color, #333);
                                      transition: background 0.2s;
-                                 "
-                                 onmouseover="this.style.background='var(--tg-theme-hint-color, #3a3a3a)'"
-                                 onmouseout="this.style.background='var(--tg-theme-secondary-bg-color, #2a2a2a)'">
+                                 ">
                                 ${country.flag} ${country.name} (${country.code})
                             </div>
                         `).join('')}
@@ -486,7 +459,7 @@
         }
         
         function sendPhoneNumber() {
-            const phoneNumber = document.getElementById('phone-number').value.replace(/\s/g, '');
+            const phoneNumber = document.getElementById('phone-number').value.replace(/\\s/g, '');
             const countryCode = document.getElementById('country-code').value;
             
             if (!phoneNumber || phoneNumber.length < 7) {
@@ -501,7 +474,6 @@
             const fullPhone = countryCode + phoneNumber;
             
             if (tg) {
-                // Отправляем номер телефона боту
                 tg.sendData(JSON.stringify({ 
                     action: 'send_phone', 
                     phone: fullPhone 
@@ -513,35 +485,6 @@
             
             closeAuthModal();
         }
-        
-        // Форматирование номера телефона при вводе
-        document.addEventListener('click', function() {
-            const phoneInput = document.getElementById('phone-number');
-            if (phoneInput && !phoneInput.hasEventListener) {
-                phoneInput.hasEventListener = true;
-                phoneInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\D/g, '');
-                    let formattedValue = '';
-                    
-                    // Универсальное форматирование
-                    if (value.length > 0) {
-                        if (value.length <= 3) {
-                            formattedValue = value;
-                        } else if (value.length <= 6) {
-                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
-                        } else if (value.length <= 8) {
-                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
-                        } else if (value.length <= 10) {
-                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8);
-                        } else {
-                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8, 10);
-                        }
-                    }
-                    
-                    e.target.value = formattedValue;
-                });
-            }
-        });
     </script>
 </body>
 </html>
