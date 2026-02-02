@@ -286,12 +286,262 @@
         }
         
         function showAuthSection() {
+            // Показываем форму ввода номера телефона
             if (tg) {
-                tg.showAlert('Функция авторизации в разработке. Скоро будет доступна!');
-            } else {
-                alert('Функция авторизации в разработке');
+                tg.showAlert('Откроется форма авторизации с выбором страны');
+            }
+            
+            // Создаем модальное окно авторизации
+            const authModal = document.createElement('div');
+            authModal.id = 'auth-modal';
+            authModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: var(--tg-theme-bg-color, #1a1a1a);
+                z-index: 1000;
+                padding: 20px;
+                overflow-y: auto;
+            `;
+            
+            authModal.innerHTML = `
+                <div style="max-width: 400px; margin: 0 auto;">
+                    <div style="display: flex; align-items: center; margin-bottom: 30px;">
+                        <button onclick="closeAuthModal()" style="
+                            background: none;
+                            border: none;
+                            color: var(--tg-theme-button-color, #3390ec);
+                            font-size: 18px;
+                            cursor: pointer;
+                            margin-right: 16px;
+                        ">←</button>
+                        <h2 style="color: var(--tg-theme-text-color, #fff); margin: 0;">Авторизация</h2>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--tg-theme-hint-color, #999); font-size: 14px; font-weight: 500;">СТРАНА</label>
+                        <div id="country-selector" onclick="showCountryList()" style="
+                            background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+                            border: 1px solid var(--tg-theme-hint-color, #333);
+                            border-radius: 12px;
+                            padding: 16px;
+                            cursor: pointer;
+                            color: var(--tg-theme-text-color, #ffffff);
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                        ">
+                            <span id="selected-country">🇷🇺 Россия (+7)</span>
+                            <span>></span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <label style="display: block; margin-bottom: 8px; color: var(--tg-theme-hint-color, #999); font-size: 14px; font-weight: 500;">НОМЕР ТЕЛЕФОНА</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="country-code" value="+7" readonly style="
+                                background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+                                border: 1px solid var(--tg-theme-button-color, #3390ec);
+                                border-radius: 12px;
+                                padding: 16px;
+                                width: 80px;
+                                text-align: center;
+                                color: var(--tg-theme-text-color, #ffffff);
+                                font-size: 16px;
+                            ">
+                            <input type="tel" id="phone-number" placeholder="999 123 45 67" style="
+                                background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+                                border: 1px solid var(--tg-theme-hint-color, #333);
+                                border-radius: 12px;
+                                padding: 16px;
+                                flex: 1;
+                                color: var(--tg-theme-text-color, #ffffff);
+                                font-size: 16px;
+                            ">
+                        </div>
+                    </div>
+                    
+                    <button onclick="sendPhoneNumber()" style="
+                        background: var(--tg-theme-button-color, #3390ec);
+                        color: var(--tg-theme-button-text-color, #ffffff);
+                        border: none;
+                        border-radius: 12px;
+                        padding: 16px;
+                        font-size: 16px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        width: 100%;
+                        margin-bottom: 20px;
+                    ">ДАЛЕЕ</button>
+                </div>
+            `;
+            
+            document.body.appendChild(authModal);
+        }
+        
+        function closeAuthModal() {
+            const modal = document.getElementById('auth-modal');
+            if (modal) {
+                modal.remove();
             }
         }
+        
+        function showCountryList() {
+            const countries = [
+                { flag: '🇷🇺', name: 'Россия', code: '+7' },
+                { flag: '🇺🇦', name: 'Украина', code: '+380' },
+                { flag: '🇰🇿', name: 'Казахстан', code: '+7' },
+                { flag: '🇧🇾', name: 'Беларусь', code: '+375' },
+                { flag: '🇺🇿', name: 'Узбекистан', code: '+998' },
+                { flag: '🇦🇿', name: 'Азербайджан', code: '+994' },
+                { flag: '🇦🇲', name: 'Армения', code: '+374' },
+                { flag: '🇬🇪', name: 'Грузия', code: '+995' },
+                { flag: '🇰🇬', name: 'Киргизия', code: '+996' },
+                { flag: '🇹🇯', name: 'Таджикистан', code: '+992' },
+                { flag: '🇹🇲', name: 'Туркменистан', code: '+993' },
+                { flag: '🇲🇩', name: 'Молдова', code: '+373' },
+                { flag: '🇱🇹', name: 'Литва', code: '+370' },
+                { flag: '🇱🇻', name: 'Латвия', code: '+371' },
+                { flag: '🇪🇪', name: 'Эстония', code: '+372' },
+                { flag: '🇺🇸', name: 'США', code: '+1' },
+                { flag: '🇩🇪', name: 'Германия', code: '+49' },
+                { flag: '🇫🇷', name: 'Франция', code: '+33' },
+                { flag: '🇬🇧', name: 'Великобритания', code: '+44' },
+                { flag: '🇮🇹', name: 'Италия', code: '+39' },
+                { flag: '🇪🇸', name: 'Испания', code: '+34' },
+                { flag: '🇵🇱', name: 'Польша', code: '+48' },
+                { flag: '🇹🇷', name: 'Турция', code: '+90' },
+                { flag: '🇨🇳', name: 'Китай', code: '+86' },
+                { flag: '🇮🇳', name: 'Индия', code: '+91' },
+                { flag: '🇯🇵', name: 'Япония', code: '+81' }
+            ];
+            
+            // Создаем модальное окно выбора страны
+            const countryModal = document.createElement('div');
+            countryModal.id = 'country-modal';
+            countryModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: var(--tg-theme-bg-color, #1a1a1a);
+                z-index: 1001;
+                padding: 20px;
+                overflow-y: auto;
+            `;
+            
+            countryModal.innerHTML = `
+                <div style="max-width: 400px; margin: 0 auto;">
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <button onclick="closeCountryModal()" style="
+                            background: none;
+                            border: none;
+                            color: var(--tg-theme-button-color, #3390ec);
+                            font-size: 18px;
+                            cursor: pointer;
+                            margin-right: 16px;
+                        ">←</button>
+                        <h2 style="color: var(--tg-theme-text-color, #fff); margin: 0;">Выберите страну</h2>
+                    </div>
+                    
+                    <div style="max-height: 60vh; overflow-y: auto;">
+                        ${countries.map(country => `
+                            <div onclick="selectCountry('${country.code}', '${country.flag} ${country.name} (${country.code})')" 
+                                 style="
+                                     padding: 16px;
+                                     border-radius: 12px;
+                                     margin-bottom: 8px;
+                                     cursor: pointer;
+                                     background: var(--tg-theme-secondary-bg-color, #2a2a2a);
+                                     color: var(--tg-theme-text-color, #fff);
+                                     border: 1px solid var(--tg-theme-hint-color, #333);
+                                     transition: background 0.2s;
+                                 "
+                                 onmouseover="this.style.background='var(--tg-theme-hint-color, #3a3a3a)'"
+                                 onmouseout="this.style.background='var(--tg-theme-secondary-bg-color, #2a2a2a)'">
+                                ${country.flag} ${country.name} (${country.code})
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(countryModal);
+        }
+        
+        function selectCountry(code, displayName) {
+            document.getElementById('country-code').value = code;
+            document.getElementById('selected-country').textContent = displayName;
+            closeCountryModal();
+        }
+        
+        function closeCountryModal() {
+            const modal = document.getElementById('country-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function sendPhoneNumber() {
+            const phoneNumber = document.getElementById('phone-number').value.replace(/\s/g, '');
+            const countryCode = document.getElementById('country-code').value;
+            
+            if (!phoneNumber || phoneNumber.length < 7) {
+                if (tg) {
+                    tg.showAlert('Введите корректный номер телефона');
+                } else {
+                    alert('Введите корректный номер телефона');
+                }
+                return;
+            }
+            
+            const fullPhone = countryCode + phoneNumber;
+            
+            if (tg) {
+                // Отправляем номер телефона боту
+                tg.sendData(JSON.stringify({ 
+                    action: 'send_phone', 
+                    phone: fullPhone 
+                }));
+                tg.showAlert(`Код будет отправлен на номер ${fullPhone}`);
+            } else {
+                alert(`Код будет отправлен на номер ${fullPhone}`);
+            }
+            
+            closeAuthModal();
+        }
+        
+        // Форматирование номера телефона при вводе
+        document.addEventListener('click', function() {
+            const phoneInput = document.getElementById('phone-number');
+            if (phoneInput && !phoneInput.hasEventListener) {
+                phoneInput.hasEventListener = true;
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    let formattedValue = '';
+                    
+                    // Универсальное форматирование
+                    if (value.length > 0) {
+                        if (value.length <= 3) {
+                            formattedValue = value;
+                        } else if (value.length <= 6) {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
+                        } else if (value.length <= 8) {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+                        } else if (value.length <= 10) {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8);
+                        } else {
+                            formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8, 10);
+                        }
+                    }
+                    
+                    e.target.value = formattedValue;
+                });
+            }
+        });
     </script>
 </body>
 </html>
