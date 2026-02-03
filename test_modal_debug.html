@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .test-btn {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            display: block;
+            width: 200px;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+        }
+        .close-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .log {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Тест модальных окон</h1>
+    
+    <button class="test-btn" onclick="testShowWithdraw()">Тест "Вывести"</button>
+    <button class="test-btn" onclick="testShowAuth()">Тест "Авторизация"</button>
+    <button class="test-btn" onclick="testShareContact()">Тест "Поделиться контактом"</button>
+    <button class="test-btn" onclick="clearLog()">Очистить лог</button>
+    
+    <div class="log" id="log">
+        Лог отладки появится здесь...
+    </div>
+    
+    <!-- Тестовые модальные окна -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <h2>🔐 Авторизация</h2>
+            <p>Тестовое модальное окно авторизации</p>
+            <button class="test-btn" onclick="testShareContact()">📱 ПОДЕЛИТЬСЯ КОНТАКТОМ</button>
+            <button class="close-btn" onclick="closeModal('auth-modal')">Закрыть</button>
+        </div>
+    </div>
+    
+    <div id="sms-modal" class="modal">
+        <div class="modal-content">
+            <h2>📱 SMS код</h2>
+            <p>Тестовое модальное окно SMS кода</p>
+            <input type="text" placeholder="Введите код" style="padding: 10px; margin: 10px; border-radius: 5px; border: none;">
+            <br>
+            <button class="close-btn" onclick="closeModal('sms-modal')">Закрыть</button>
+        </div>
+    </div>
+    
+    <script>
+        // Симуляция Telegram WebApp
+        window.Telegram = {
+            WebApp: {
+                requestContact: function() {
+                    log('🔥 Telegram.WebApp.requestContact() вызван');
+                    alert('Симуляция запроса контакта');
+                },
+                showAlert: function(message) {
+                    log('📢 Telegram.WebApp.showAlert: ' + message);
+                    alert(message);
+                }
+            }
+        };
+        
+        let tg = window.Telegram?.WebApp;
+        
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `[${timestamp}] ${message}<br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = 'Лог очищен...<br>';
+        }
+        
+        function showModal(modalId) {
+            log('📂 Показываем модальное окно: ' + modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                log('✅ Модальное окно показано: ' + modalId);
+            } else {
+                log('❌ Модальное окно не найдено: ' + modalId);
+            }
+        }
+        
+        function closeModal(modalId) {
+            log('📁 Закрываем модальное окно: ' + modalId);
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                log('✅ Модальное окно закрыто: ' + modalId);
+            } else {
+                log('❌ Модальное окно не найдено: ' + modalId);
+            }
+        }
+        
+        function testShowWithdraw() {
+            log('🎯 Тест функции showWithdrawModal()');
+            showWithdrawModal();
+        }
+        
+        function testShowAuth() {
+            log('🎯 Тест функции showModal("auth-modal")');
+            showModal('auth-modal');
+        }
+        
+        function testShareContact() {
+            log('🎯 Тест функции shareContact()');
+            shareContact();
+        }
+        
+        function showWithdrawModal() {
+            log('💫 showWithdrawModal вызвана');
+            showModal('auth-modal');
+        }
+        
+        function shareContact() {
+            log('📱 shareContact вызвана');
+            
+            if (tg) {
+                log('✅ Telegram WebApp доступен');
+                
+                try {
+                    if (tg.requestContact) {
+                        log('📞 Запрашиваем контакт...');
+                        tg.requestContact();
+                        
+                        closeModal('auth-modal');
+                        
+                        if (tg.showAlert) {
+                            tg.showAlert('Поделитесь контактом в чате с ботом');
+                        }
+                        
+                        setTimeout(() => {
+                            showModal('sms-modal');
+                        }, 2000);
+                    } else {
+                        log('❌ requestContact не доступен');
+                    }
+                } catch (error) {
+                    log('❌ Ошибка: ' + error.message);
+                }
+            } else {
+                log('❌ Telegram WebApp не доступен');
+            }
+        }
+        
+        log('🚀 Тестовая страница загружена');
+        log('📱 Telegram WebApp: ' + (tg ? 'доступен' : 'не доступен'));
+    </script>
+</body>
+</html>
